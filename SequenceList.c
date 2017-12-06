@@ -27,7 +27,7 @@ int LocateElem(SqList * L, ElemType * e);
 Status PriorElem(SqList * L, ElemType * cur_e, ElemType * pre_e);
 Status NextElem(SqList * L, ElemType * cur_e, ElemType * next_e);
 Status ListInsert(SqList * L, int i, ElemType * e);
-void ListDelete(SqList * L, int i, ElemType * e);
+Status ListDelete(SqList * L, int i, ElemType * e);
 Status ListTraverse(SqList * L);
 void growList(SqList * L);
 void cutList(SqList * L);
@@ -66,7 +66,7 @@ int main() {
 			printf("\nPlease input the name of new list.\n");
 			char * name = (char *)malloc(30 * sizeof(char)); fgetsNoN(name, 30, stdin);
 
-			if (InitList(&L) == OK) printf("Linear Table has been created！\n");
+			if (InitList(&L) == OK) printf("Linear Table has been created\n");
 			else printf("\nFailed! Because there is no more space in stake's memory, we can't creat a new table.\n");
 			L->name = name;
 			break;
@@ -130,11 +130,11 @@ int main() {
 				if (pos != -1) {
 					ElemType * get = (ElemType *)malloc(sizeof(ElemType));
 					if (PriorElem(L, cur, get)) {
-						printf("\n----Failed! The element you select don't have a prior element.\n");
-					} else {
 						printf("\n----The prior element you get is %d.\n", *get);
-						free(get);
+					} else {
+						printf("\n----Failed! The element you select don't have a prior element.\n");
 					}
+					free(get);
 				} else {
 					printf("\n----Failed! We can't find such a element.\n");
 				}
@@ -151,11 +151,11 @@ int main() {
 				if (pos != -1) {
 					ElemType * get = (ElemType *)malloc(sizeof(ElemType));
 					if (NextElem(L, cur, get)) {
-						printf("\n----Failed! The element you select don't have a next element.\n");
-					} else {
 						printf("\n----The next element you get is %d.\n", *get);
-						free(get);
+					} else {
+						printf("\n----Failed! The element you select don't have a next element.\n");
 					}
+					free(get);
 				} else {
 					printf("\n----Failed! We can't find such a element.\n");
 				}
@@ -184,8 +184,13 @@ int main() {
 				printf("\n---Please input the position:");
 				scanf("%d%*c", &pos);
 				ElemType * elem = (ElemType *)malloc(sizeof(ElemType));
-				ListDelete(L, pos, elem);
-				printf("\n----Successfully delete element:%d!\n", *elem);
+
+				if (ListDelete(L, pos, elem)){
+                    printf("\n----Successfully delete element:%d!\n", *elem);
+				} else{
+                    printf("\n----Failed!\n");
+				}
+
 				free(elem);
 			}
 			break;
@@ -217,7 +222,8 @@ int main() {
 			break;
 		}
 		free(cur);
-		Sleep(1000);
+//		Sleep(1000);
+		system("pause");
 	}
 	printf("See you!\n");
 	return 0;
@@ -238,6 +244,14 @@ Status SaveList(SqList * L) {
 
 Status LoadList(SqList ** Lp, char * name) {
     SqList * L = *Lp;
+    FILE * fP = fopen(L->name, "rb");
+    
+    if (fP == NULL) {
+    	return FALSE;
+		printf("File open error\n ");
+		fclose(fP);
+	}
+    
 	if (L != NULL) {
 		DestoryList(L);
 		L = NULL;
@@ -245,22 +259,14 @@ Status LoadList(SqList ** Lp, char * name) {
 	if (InitList(Lp) != OK) return FALSE;
     L = *Lp;
 	L->name = name;
-	FILE * fP = fopen(L->name, "rb");
-	if (fP != NULL) {
-
-		while (fread(&(L->elem[L->length]), sizeof(ElemType), 1, fP)) {
-			L->length++;
-			if (L->length == L->listsize) {
-				growList(L);
-			}
+	
+	while (fread(&(L->elem[L->length]), sizeof(ElemType), 1, fP)) {
+		L->length++;
+		if (L->length == L->listsize) {
+			growList(L);
 		}
-		fclose(fP);
-		return TRUE;
-	} else {
-		printf("File open error\n ");
-		fclose(fP);
-		return FALSE;
 	}
+	fclose(fP);
 }
 
 Status InitList(SqList ** Lp) {
@@ -277,12 +283,12 @@ Status InitList(SqList ** Lp) {
 }
 
 void growList(SqList * L) {
-	L->elem = (ElemType *)realloc(L, L->listsize + LISTINCREMENT);
+	L->elem = (ElemType *)realloc(L->elem, L->listsize + LISTINCREMENT);
 	if (L->elem == NULL) exit(0);
 }
 
 void cutList(SqList * L) {//Pay attention to the opportunity to avoid frequently cutting and growing
-	L->elem = (ElemType *)realloc(L, L->listsize - LISTINCREMENT);
+	L->elem = (ElemType *)realloc(L->elem, L->listsize - LISTINCREMENT);
 	if (L->elem == NULL) exit(0);
 }
 
@@ -334,7 +340,6 @@ Status PriorElem(SqList * L, ElemType * cur_e, ElemType * pre_e) {
 			}
 		}
 	}
-	free(pre_e);
 	return FALSE;
 }
 
@@ -350,7 +355,6 @@ Status NextElem(SqList * L, ElemType * cur_e, ElemType * next_e) {
 			}
 		}
 	}
-	free(next_e);
 	return FALSE;
 }
 
@@ -371,7 +375,11 @@ Status ListInsert(SqList * L, int i, ElemType * e) {
 	return TRUE;
 }
 
-void ListDelete(SqList * L, int i, ElemType * e) {
+Status ListDelete(SqList * L, int i, ElemType * e) {
+	if (i >= L->length){
+        *e = 0;
+        return FALSE;
+	}
 	int temp = i;
 	int length = L->length;
 	ElemType * head = L->elem;
@@ -381,10 +389,10 @@ void ListDelete(SqList * L, int i, ElemType * e) {
 	}
 	head[length - 1] = 0;//reset this value
 	L->length--;
-	if (length <= L->listsize - 15) {//cut list
+	if (15 <= L->listsize - length) {//cut list
 		cutList(L);
 	}
-
+	return TRUE;
 }
 
 Status ListTraverse(SqList * L) {
@@ -415,3 +423,4 @@ char *fgetsNoN(char *buf, int bufsize, FILE *stream) {
 	buf[i] = '\0';
 	return returnP;
 }
+
