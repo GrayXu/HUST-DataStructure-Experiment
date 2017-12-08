@@ -31,7 +31,7 @@ int LocateElem(SqList * L, ElemType * e);
 Status PriorElem(SqList * L, ElemType * cur_e, ElemType * pre_e);
 Status NextElem(SqList * L, ElemType * cur_e, ElemType * next_e);
 Status ListInsert(SqList * L, int i, ElemType * e);
-void ListDelete(SqList * L, int i, ElemType * e);
+Status ListDelete(SqList * L, int i, ElemType * e);
 Status ListTraverse(SqList * L);
 Status SaveList(SqList * L);
 Status LoadList(SqList ** L, char * name);
@@ -67,13 +67,13 @@ int main() {
 			printf("\nPlease input the name of new list.\n");
 			char * name = (char *)malloc(30 * sizeof(char)); fgetsNoN(name, 30, stdin);
 
-			if (InitList(&L) == OK) printf("Linear Table has been created！\n");
+			if (InitList(&L) == OK) printf("Linear Table has been created!\n");
 			else printf("\nFailed! Because there is no more space in stake's memory, we can't creat a new table.\n");
 			L->name = name;
 			break;
 		case 2://DestoryList
 			if (L == NULL) printf("You should init or load first!\n");
-			else DestoryList(L);
+			else DestoryList(L); L = NULL;
 			break;
 		case 3://ClearList
 			if (L == NULL) printf("You should init or load first!\n");
@@ -113,7 +113,7 @@ int main() {
 			else {
 				printf("\nPlease input the model element.\n");
 				scanf("%d%*c", cur);
-				pos = LocateElem(L, cur); pos++;
+				pos = LocateElem(L, cur);
 				if (pos != 0) {
 					printf("\n----The index of the first element equal with yours is %d.\n", pos);
 				} else {
@@ -131,11 +131,11 @@ int main() {
 				if (pos != -1) {
 					ElemType * get = (ElemType *)malloc(sizeof(ElemType));
 					if (PriorElem(L, cur, get)) {
-						printf("\n----Failed! The element you select don't have a prior element.\n");
-					} else {
 						printf("\n----The prior element you get is %d.\n", *get);
-						free(get);
+					} else {
+						printf("\n----Failed! The element you select don't have a prior element.\n");
 					}
+					free(get);
 				} else {
 					printf("\n----Failed! We can't find such a element.\n");
 				}
@@ -152,11 +152,11 @@ int main() {
 				if (pos != -1) {
 					ElemType * get = (ElemType *)malloc(sizeof(ElemType));
 					if (NextElem(L, cur, get)) {
-						printf("\n----Failed! The element you select don't have a next element.\n");
-					} else {
 						printf("\n----The next element you get is %d.\n", *get);
-						free(get);
+					} else {
+						printf("\n----Failed! The element you select don't have a next element.\n");
 					}
+					free(get);
 				} else {
 					printf("\n----Failed! We can't find such a element.\n");
 				}
@@ -185,8 +185,11 @@ int main() {
 				printf("\n---Please input the position:");
 				scanf("%d%*c", &pos);
 				ElemType * elem = (ElemType *)malloc(sizeof(ElemType));
-				ListDelete(L, pos, elem);
-				printf("\n----Successfully delete element:%d!\n", *elem);
+				if (ListDelete(L, pos, elem)) {
+					printf("\n----Successfully delete element:%d!\n", *elem);
+				} else {
+					printf("\n----Failed! The position you input is out of bound.\n");
+				}
 				free(elem);
 			}
 			break;
@@ -218,7 +221,8 @@ int main() {
 			break;
 		}
 		free(cur);
-		Sleep(1000);
+		//Sleep(1000);
+		system("pause");
 	}
 	printf("See you!\n");
 	return 0;
@@ -229,7 +233,7 @@ Status SaveList(SqList * L) {
 	if (fP != NULL) {
 		LNode * p = L->head;
 		while (p != NULL) {
-			fwrite(p->data, sizeof(ElemType), 1, fP);
+			fwrite(&(p->data), sizeof(ElemType), 1, fP);
 			p = p->next;
 		}
 		fclose(fP);
@@ -274,7 +278,6 @@ Status LoadList(SqList ** Lp, char * name) {
 		return TRUE;
 	} else {
 		printf("File open error\n ");
-		fclose(fP);
 		return FALSE;
 	}
 }
@@ -284,7 +287,6 @@ Status InitList(SqList ** Lp) {
 
 	SqList * L = *Lp;
 	L->length = 0;
-	L->head == NULL;//I didn't set any space for the head node for saving space
 	//the name part space will be spaced by outside
 	return OK;
 }
@@ -308,6 +310,7 @@ void ClearList(SqList * L) {
 	}
 	free(p);
 	L->length = 0;
+	L->head = NULL;
 }
 
 Status ListEmpty(SqList * L) {
@@ -343,7 +346,7 @@ Status GetElem(SqList * L, int i, ElemType * e) {
 
 Status PriorElem(SqList * L, ElemType * cur_e, ElemType * pre_e) {
 	LNode * p = L->head;
-	while (p != NULL) {
+	while (p->next != NULL) {
 
 		if (p->next->data == *cur_e) {//if the condition is true, then the point now is the prior one
 			*pre_e = p->data;
@@ -371,14 +374,16 @@ Status NextElem(SqList * L, ElemType * cur_e, ElemType * next_e) {
 Status ListInsert(SqList * L, int i, ElemType * e) {
 	int count = 0;
 	LNode * p = L->head;
-	if (i>L->length || i<1) {
+	if (i>L->length+1 || i<1) {
 		return FALSE;
 	}
-	if (i = 1) {//insert to be the first one
+	if (i == 1) {//insert to be the first one
 		LNode * newP = (LNode *)malloc(sizeof(LNode));
 		newP->data = *e;
 		newP->next = L->head;
 		L->head = newP;
+		L->length++;
+		return OK;
 	} else {
 		while (p != NULL) {
 			count++;//fit as usual
@@ -387,7 +392,7 @@ Status ListInsert(SqList * L, int i, ElemType * e) {
 				newP->data = *e;
 				LNode * pNext = p->next;
 				p->next = newP;
-				newP->data = pNext;//exchange the next pointer
+				newP->next = pNext;//exchange the next pointer
 				L->length++;
 				return OK;
 			}
@@ -398,7 +403,7 @@ Status ListInsert(SqList * L, int i, ElemType * e) {
 	return FALSE;
 }
 
-void ListDelete(SqList * L, int i, ElemType * e) {
+Status ListDelete(SqList * L, int i, ElemType * e) {
 	int count = 0;
 	LNode * p = L->head;
 	if (i>L->length || i<1) {
@@ -426,9 +431,7 @@ void ListDelete(SqList * L, int i, ElemType * e) {
 }
 
 Status ListTraverse(SqList * L) {
-	int i;
 	printf("\n-----------all elements -----------------------\n");
-	//for (i = 0; i<L->length; i++) printf("%d ", L->elem[i]);
 	LNode * p = L->head;
 	while (p != NULL) {
 		printf("%d ", p->data);
