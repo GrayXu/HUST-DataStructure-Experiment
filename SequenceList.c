@@ -72,7 +72,7 @@ int main() {
 			break;
 		case 2://DestoryList
 			if (L == NULL) printf("You should init or load first!\n");
-			else DestoryList(L);
+			else DestoryList(L);L=NULL;
 			break;
 		case 3://ClearList
 			if (L == NULL) printf("You should init or load first!\n");
