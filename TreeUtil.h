@@ -7,7 +7,7 @@ typedef int Status;
 #define TRUE 1
 #define FALSE 0
 #define OK 1
-#define NOTFOUNDCODE 90017//just a not
+#define NOTFOUNDCODE 90017//flag number
 #define SUCCESSFULCODE 90016
 
 
@@ -57,7 +57,7 @@ int Parent_recurve(Node * start, Node * key, Node ** parent);
 int Value_recurve(Node * key, Node * n, ElemType * get);
 int Assign_recurve(Node * start, Node * key, ElemType * value);
 void ClearBiTree_recurve(Node * n);
-void printERROR();
+void printERROR(int code);//print error infomation
 
 //Create a new and empty binary tree
 Status InitBiTree(Tree ** T) {
@@ -70,7 +70,7 @@ Status InitBiTree(Tree ** T) {
 		*T = newT;
 		return OK;
 	} else {
-		printERROR();
+		printERROR(1);
 		return FALSE;
 	}
 
@@ -120,7 +120,7 @@ int Assign_recurve(Node * start, Node * key, ElemType * value) {//for recursion
 	}
 	if (Assign_recurve(start->left, key, value)) return 1;
 	if (Assign_recurve(start->right, key, value)) return 1;
-
+	return 0;
 }
 
 //get value of node-e of tree-T
@@ -142,12 +142,23 @@ int Value_recurve(Node * key, Node * n, ElemType * get) {//for recursion
 
 	if (Value_recurve(key, n->left, get)) return 1;
 	if (Value_recurve(key, n->right, get)) return 1;
-
+	return 0;
 }
 
 //just print error info
-void printERROR() {
-	printf("\nStack overflow\n");
+void printERROR(int code) {
+
+	switch (code) {
+	case 1:
+		printf("\nStack overflow\n");
+		break;
+	case 2:
+		printf("\nThere isn't such a tree.\n");
+		break;
+	}
+	
+
+	
 }
 
 //get left child of tree-T
@@ -174,6 +185,7 @@ int Parent_recurve(Node * start, Node * key, Node ** parent) {
 	}
 	if (Parent_recurve(start->left, key, parent)) return 1;
 	if (Parent_recurve(start->right, key, parent)) return 1;
+	return 0;
 }
 
 //find the right sibling of node-e in tree-T
