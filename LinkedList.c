@@ -186,7 +186,7 @@ int main() {
 				scanf("%d%*c", &pos);
 				ElemType * elem = (ElemType *)malloc(sizeof(ElemType));
 				if (ListDelete(L, pos, elem)) {
-					printf("\n----Successfully delete element:%d!\n", *elem);
+					printf("\n----Successfully delete element\n");
 				} else {
 					printf("\n----Failed! The position you input is out of bound.\n");
 				}
@@ -260,7 +260,7 @@ Status LoadList(SqList ** Lp, char * name) {
 		LNode * p = newP;
 		int flag = 1;
 
-		while (fread(&( newP->data ), sizeof(ElemType), 1, fP)) {
+		while (fread(&(newP->data), sizeof(ElemType), 1, fP)) {
 			L->length++;
 			if (flag) {
 				L->head = newP;
@@ -287,14 +287,13 @@ Status InitList(SqList ** Lp) {
 
 	SqList * L = *Lp;
 	L->length = 0;
+	L->head = NULL;
 	//the name part space will be spaced by outside
 	return OK;
 }
 
 void DestoryList(SqList * L) {
-	
 	ClearList(L);
-
 	free(L->name);
 	free(L);
 }
@@ -302,6 +301,7 @@ void DestoryList(SqList * L) {
 void ClearList(SqList * L) {
 	LNode * p = L->head;
 	LNode * pNext = p;
+	if (p == NULL) return;
 	//free all data in this list
 	while (p->next != NULL) {
 		pNext = p->next;
@@ -374,20 +374,20 @@ Status NextElem(SqList * L, ElemType * cur_e, ElemType * next_e) {
 Status ListInsert(SqList * L, int i, ElemType * e) {
 	int count = 0;
 	LNode * p = L->head;
-	if (i>L->length+1 || i<1) {
+	if (i>L->length + 1 || i<1) {
 		return FALSE;
 	}
 	if (i == 1) {//insert to be the first one
 		LNode * newP = (LNode *)malloc(sizeof(LNode));
 		newP->data = *e;
-		newP->next = L->head;
+		newP->next = L->head;//NULL or the old head
 		L->head = newP;
 		L->length++;
 		return OK;
 	} else {
 		while (p != NULL) {
 			count++;//fit as usual
-			if (count == i-1) {//find the prior
+			if (count == i - 1) {//find the prior
 				LNode * newP = (LNode *)malloc(sizeof(LNode));
 				newP->data = *e;
 				LNode * pNext = p->next;
@@ -416,7 +416,7 @@ Status ListDelete(SqList * L, int i, ElemType * e) {
 	}
 	while (p != NULL) {
 		count++;//fit as usual
-		if (count == i-1) {//find the prior ( p->next would never be null
+		if (count == i - 1) {//find the prior ( p->next would never be null
 			LNode * freeP = p->next;
 			p->next = p->next->next;
 			free(freeP);

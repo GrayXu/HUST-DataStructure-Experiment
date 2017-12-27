@@ -7,11 +7,10 @@ typedef int Status;
 #define TRUE 1
 #define FALSE 0
 #define OK 1
-#define NOTFOUNDCODE 90017//flag number
-#define SUCCESSFULCODE 90016
 
 
 typedef struct node {
+	ElemType key;
 	ElemType data;
 	struct node * left;
 	struct node * right;
@@ -39,6 +38,7 @@ Node * LeftSibling(Tree * T, Node * e);
 Node * RightSibling(Tree * T, Node * e);
 Status InsertChild(Tree * T, Node *p, int LR, Tree * c);//c is a new tree to insert
 Status DeleteChild(Tree * T, Node * p, int LR);
+Node * FindNode(Tree * T, ElemType key);
 
 Status PreOrderTraverse(Tree * T);
 Status InOrderTraverse(Tree * T);
@@ -54,17 +54,16 @@ void PostOrderTraverse_recurve(Node * n);
 void InOrderTraverse_recurve(Node * n);
 void PreOrderTraverse_recurve(Node * n);
 int Parent_recurve(Node * start, Node * key, Node ** parent);
-int Value_recurve(Node * key, Node * n, ElemType * get);
-int Assign_recurve(Node * start, Node * key, ElemType * value);
 void ClearBiTree_recurve(Node * n);
 void printERROR(int code);//print error infomation
+int FindNode_recurve(Node * node, ElemType key, Node ** result);
 
 //Create a new and empty binary tree
 Status InitBiTree(Tree ** T) {
 
 	Tree * newT = (Tree *)malloc(sizeof(Tree));
 	newT->length = 0;
-	newT->name = NULL;
+	newT->name = NULL;//set its name outside
 	newT->root = NULL;
 	if (newT != NULL) {
 		*T = newT;
@@ -102,47 +101,19 @@ Node * Root(Tree * T) {
 
 //assign a value for node-e of tree-T
 Status Assign(Tree * T, Node * e, ElemType value) {
-	ElemType valueBackup = value;
-	Assign_recurve(T->root, e, &value);
-	if (value == SUCCESSFULCODE) {
-		return OK;
-	} else {
+	//Assign_recurve(T->root, e, &value);
+	if (e == NULL) {
 		return FALSE;
+	} else {
+		e->data = value;
+		return OK;
 	}
-}
-int Assign_recurve(Node * start, Node * key, ElemType * value) {//for recursion
-
-	if (!start) return 0;
-	if (key == start) {
-		key->data = *value;
-		*value = SUCCESSFULCODE;
-		return 1;
-	}
-	if (Assign_recurve(start->left, key, value)) return 1;
-	if (Assign_recurve(start->right, key, value)) return 1;
-	return 0;
 }
 
 //get value of node-e of tree-T
 ElemType Value(Tree * T, Node *e) {
-	ElemType get = NOTFOUNDCODE;
-	Value_recurve(e, T->root, &get);
-	if (get == NOTFOUNDCODE) {
-		return NOTFOUNDCODE;
-	} else {
-		return get;
-	}
-}
-int Value_recurve(Node * key, Node * n, ElemType * get) {//for recursion
-	if (n == NULL) return 0;
-	if (key == n) {
-		*get = n->data;
-		return 1;//1 means that we found the element, so we can set a flag to stop recursion
-	}
-
-	if (Value_recurve(key, n->left, get)) return 1;
-	if (Value_recurve(key, n->right, get)) return 1;
-	return 0;
+	if (!T || !e) return FALSE;
+	return e->data;
 }
 
 //just print error info
@@ -155,10 +126,27 @@ void printERROR(int code) {
 	case 2:
 		printf("\nThere isn't such a tree.\n");
 		break;
+	case 3:
+		printf("\nThere isn't such a node in this tree.\n");
+		break;
 	}
-	
+}
 
-	
+//find the node of tree-T by key
+Node * FindNode(Tree * T, ElemType key) {
+	Node * result = NULL;
+	FindNode_recurve(T->root, key, &result);
+	return result;
+}
+int FindNode_recurve(Node * node, ElemType key, Node ** result) {
+	if (!node) return 0;
+	if (node->key == key) {
+		*result = node;
+		return 1;//1 means that we found the element, so we can set a flag to stop recursion
+	}
+	if (FindNode_recurve(node->left, key, result)) return 1;
+	if (FindNode_recurve(node->left, key, result)) return 1;
+	return 0;
 }
 
 //get left child of tree-T
@@ -281,12 +269,14 @@ Status InsertNode(Tree * T, Node * p, int LR, Node * c) {
 		Node * left = p->left;
 		if (!left) {//left is null
 			p->left = c;
+			T->length++;
 			return OK;
 		}
 	} else {
 		Node * right = p->right;
 		if (!right) {//right is null
 			p->right = c;
+			T->length++;
 			return OK;
 		}
 	}
@@ -334,7 +324,7 @@ void BiTreeDepth_recurve(Node * node) {
 		--depth;
 		return;
 	}
-	
+
 	++depth;
 	if (depth > depthMax) depthMax = depthMax;
 
@@ -362,7 +352,7 @@ Status LevelOrderTraverse(Tree * T) {
 	} else {
 		return FALSE;
 	}
-	
+
 }
 void LevelOreder_recurve(Node * node) {
 	if (!node) {
