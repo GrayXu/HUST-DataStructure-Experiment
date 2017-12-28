@@ -321,6 +321,7 @@ int ListLength(SqList * L) {
 }
 
 Status GetElem(SqList * L, int i, ElemType * e) {
+    i--;
 	if (i < L->length) {
 		*e = L->elem[i];
 		return TRUE;
@@ -360,6 +361,7 @@ Status NextElem(SqList * L, ElemType * cur_e, ElemType * next_e) {
 }
 
 Status ListInsert(SqList * L, int i, ElemType * e) {
+    i--;
 	int index = L->length;
 	if (i > index) {//IndexOutOfBoundException
 		return FALSE;
