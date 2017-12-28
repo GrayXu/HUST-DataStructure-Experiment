@@ -244,22 +244,22 @@ Status SaveList(SqList * L) {
 
 Status LoadList(SqList ** Lp, char * name) {
     SqList * L = *Lp;
-    FILE * fP = fopen(L->name, "rb");
-    
+    FILE * fP = fopen(name, "rb");
+
     if (fP == NULL) {
     	return FALSE;
 		printf("File open error\n ");
 		fclose(fP);
 	}
-    
+
 	if (L != NULL) {
 		DestoryList(L);
-		L = NULL;
+		*Lp = NULL;
 	}
 	if (InitList(Lp) != OK) return FALSE;
     L = *Lp;
 	L->name = name;
-	
+
 	while (fread(&(L->elem[L->length]), sizeof(ElemType), 1, fP)) {
 		L->length++;
 		if (L->length == L->listsize) {
@@ -267,6 +267,7 @@ Status LoadList(SqList ** Lp, char * name) {
 		}
 	}
 	fclose(fP);
+	return OK;
 }
 
 Status InitList(SqList ** Lp) {
