@@ -1,16 +1,19 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <windows.h>
+#include <math.h>
+#include <assert.h>
 
 typedef int ElemType;//make sure that it's a basic data type
 typedef int Status;
 #define TRUE 1
 #define FALSE 0
 #define OK 1
-
+#define NULLNODECODE 90017
+#define LOAD_LIST_SIZE 31
 
 typedef struct node {
-	ElemType key;
+	ElemType key;//a key to find this node
 	ElemType data;
 	struct node * left;
 	struct node * right;
@@ -19,6 +22,7 @@ typedef struct node {
 typedef struct tree {
 	int length;
 	char * name;
+
 	Node * root;
 } Tree;
 
@@ -57,10 +61,11 @@ int Parent_recurve(Node * start, Node * key, Node ** parent);
 void ClearBiTree_recurve(Node * n);
 void printERROR(int code);//print error infomation
 int FindNode_recurve(Node * node, ElemType key, Node ** result);
+void saveTree_recurve(Node * node, int i);
 
 //Create a new and empty binary tree
 Status InitBiTree(Tree ** T) {
-
+	
 	Tree * newT = (Tree *)malloc(sizeof(Tree));
 	newT->length = 0;
 	newT->name = NULL;//set its name outside
@@ -324,7 +329,7 @@ void BiTreeDepth_recurve(Node * node) {
 		--depth;
 		return;
 	}
-
+	
 	++depth;
 	if (depth > depthMax) depthMax = depthMax;
 
@@ -334,16 +339,17 @@ void BiTreeDepth_recurve(Node * node) {
 }
 
 
-//traverse in level, kind of BST, using an aux-quene
+//traverse in level, kind of BST, without an aux-quene to save memory
 int i = 0;
 int depthNow = 0;
+
 Status LevelOrderTraverse(Tree * T) {
+	i = 0; depthNow = 0;//reset two flags
 	if (T) {
 		Node * head = T->root;
 		depthNow = 0;
 		printf("LevelOrderTraverse:");
 		for (i = 1; i <= BiTreeDepth(T); i++) {
-
 			//each i means that we are trying to print all elements of the i'th level
 			LevelOreder_recurve(head);
 		}
@@ -352,7 +358,6 @@ Status LevelOrderTraverse(Tree * T) {
 	} else {
 		return FALSE;
 	}
-
 }
 void LevelOreder_recurve(Node * node) {
 	if (!node) {
@@ -363,16 +368,98 @@ void LevelOreder_recurve(Node * node) {
 	++depthNow;
 	if (depthNow == i) {
 		printf("%d ", node->data);
+	} else {
+		LevelOreder_recurve(node->left);
+		LevelOreder_recurve(node->right);
 	}
-	LevelOreder_recurve(node->left);
-	LevelOreder_recurve(node->right);
+	
 }
 
+//save this tree in disk in a simple way
+Node ** saveList = NULL;
 Status saveTree(Tree * T) {
-	return FALSE;
+	
+	FILE * fP = fopen(T->name, "wb");
+	if (!fP) return FALSE;	
+	int depth = BiTreeDepth(T);
+	const int LISTSIZE = pow(2,depth) - 1;
+	Node ** saveList = (Node **)malloc(sizeof(Node*)*LISTSIZE);
+	int i = 0;
+	for (i = 0; i < LISTSIZE; i++) {
+		saveList[i] = NULL;
+	}//initalize save list
+
+	Node * nullNode = (Node*)malloc(sizeof(Node));
+	nullNode->data = NULLNODECODE;
+	nullNode->key = NULLNODECODE;
+
+	saveTree_recurve(T->root, 1);//call this function to load nodes to save list, including null nodes
+	for (i = 0; i < LISTSIZE; i++) {
+		if (saveList[i]) {
+			fwrite(saveList[i], sizeof(Node), 1, fP);
+		} else {//null node
+			fwrite(nullNode, sizeof(Node), 1, fP);
+		}
+		
+	}//save node list to disk
+	free(saveList);saveList = NULL;//reset
+	return TRUE;
+}
+void saveTree_recurve(Node * node, int i) {
+	if (!node) return;
+	saveList[i - 1] = node;
+	
+	saveTree_recurve(node->left, 2 * i);
+	saveTree_recurve(node->right, 2 * i+1);
 }
 
+//Load tree data from disk
+Node ** loadList = NULL;
+int maxIndex_loadTree = 0;
 Tree * LoadTree(char * TreeName) {
-	return NULL;
+	maxIndex_loadTree = 0;
+	loadList = (Node **)malloc(sizeof(Node *) * LOAD_LIST_SIZE);//we set a init-num, in fact it's not elegant.
+	register int i = 0;
+	for (i = 0; i < LOAD_LIST_SIZE; i++) {
+		loadList[i] = NULL;
+	}
+	FILE * fP = fopen(TreeName, "rb");
+	if (!fP) return NULL;
+	else {//this file exists
+		i = 0;
+		Node * newNode = (Node*)malloc(sizeof(Node));
+		while (fread(newNode, sizeof(Node), 1, fP)) {
+			loadList[i] = newNode; i++;
+		}
+	}
+	//now we got a list full of nodes
+	//int i is length of this list
+	int depth = (int)sqrt(i+1);
+	maxIndex_loadTree = i;
+	Node * root = LoadTree_recurve(1);//load
+	Tree * T = (Tree *)malloc(sizeof(Tree));
+	if (T) {
+		T->length = i;
+		T->name = TreeName;
+	}
+	free(loadList);
+	return T;
 }
-
+Node * LoadTree_recurve(int i) {
+	Node * node = loadList[i-1];
+	assert(node);//variable "node" here is not a null node
+	if (node->data == NULLNODECODE) {
+		return NULL;
+	}
+	if (i * 2 > maxIndex_loadTree) {//at the buttom of this sub-tree
+		node->left = NULL;
+	} else {
+		node->left = LoadTree_recurve(i * 2);
+	}
+	if (i * 2 + 1 > maxIndex_loadTree) {//at the buttom of this sub-tree
+		node->right = NULL;
+	} else {
+		node->right = LoadTree_recurve(i * 2 + 1);
+	}
+	return node;
+}

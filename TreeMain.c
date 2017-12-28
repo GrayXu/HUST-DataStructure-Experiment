@@ -25,7 +25,7 @@ void initTreeArray() {
 //move this tree to the end of tree array so we can easily remove it
 //if you try to vall this func , make sure tree-T has already been in tree array
 void removeTreeFromArray(Tree * T) {
-
+	
 	int index = 0;
 	for (index = 0; index < indexTreeArray; index++) {
 		if (treeArray[index] == T) {
@@ -65,7 +65,7 @@ void IBT1() {
 	Tree * T = NULL;
 	printf("\nPlease input the name of new list:");
 	char * name = (char *)malloc(30 * sizeof(char)); fgetsNoN(name, 30, stdin);
-	if (InitBiTree(&T)) {
+	if (InitBiTree(&T)) { 
 		printf("Binary Tree has been created\n");
 		T->name = name;
 		treeArray[indexTreeArray] = T; indexTreeArray++;
@@ -353,6 +353,33 @@ void LOT19() {
 	}
 }
 
+//Load tree
+void LT20() {
+	printf("Please input the name of this tree:");
+	char * name = (char*)malloc(sizeof(char) * 30); fgetsNoN(name, 30, stdin);
+	Tree * T = LoadTree(name);
+	if (T) {
+		treeArray[indexTreeArray] = T; indexTreeArray++;
+		printf("successful\n");
+	} else {
+		free(name);
+		printf("there is not such a tree's name in your disk\n");
+	}
+}
+
+//save tree
+void ST21() {
+	Tree * T = getTree();
+	if (!T) printERROR(2);
+	else {
+		if (saveTree(T)) {
+			printf("Succesful!\n");
+		} else {
+			printf("Failed to open file\n");
+		}
+	}
+}
+
 //insert a new node to a given parent node
 void IN22() {
 	Tree * T = getTree();
@@ -363,7 +390,7 @@ void IN22() {
 		printf("Please input the value of new node:");
 		ElemType value = 0; scanf("%d%*c", &value);
 		Node * newNode = (Node*)malloc(sizeof(Node *));
-		newNode->key = key;
+		newNode->key = key; 
 		newNode->data = value;
 		newNode->left = NULL; newNode->right = NULL;
 		if (!BiTreeEmpty(T)) {//it's empty now
@@ -459,6 +486,7 @@ int main() {
 		case 20://LoadTree
 			break;
 		case 21://Save tree
+			ST21();
 			break;
 		case 22://InsertNode
 			IN22();break;
@@ -471,7 +499,6 @@ int main() {
 	printf("\nSee you\n");
 	return 0;
 }
-
 
 
 char *fgetsNoN(char *buf, int bufsize, FILE *stream) {
