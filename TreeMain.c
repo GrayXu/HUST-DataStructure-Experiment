@@ -33,11 +33,11 @@ void removeTreeFromArray(Tree * T) {
 		}
 	}
 	//now "index" points at Tree-T
-	if (index == indexTreeArray-1) {//at the end
-		treeArray[indexTreeArray-1] = NULL;
+	if (index == indexTreeArray - 1) {//at the end
+		treeArray[indexTreeArray - 1] = NULL;
 	} else {
-		Tree * tail = treeArray[indexTreeArray-1];
-		treeArray[indexTreeArray-1] = NULL;
+		Tree * tail = treeArray[indexTreeArray - 1];
+		treeArray[indexTreeArray - 1] = NULL;
 		treeArray[index] = tail;
 	}
 	indexTreeArray--;
@@ -68,14 +68,13 @@ void IBT1() {
 		printf("Binary Tree has been created\n");
 		T->name = name;
 		treeArray[indexTreeArray] = T; indexTreeArray++;
-	}
-	else { printf("\nFailed! Because there is no more space in stake's memory, we can't creat a new tree.\n"); }
+	} else { printf("\nFailed! Because there is no more space in stake's memory, we can't creat a new tree.\n"); }
 }
 
 //Assign
 void A2() {
 	Tree * T = getTree();
-	if(!T) printERROR(2);
+	if (!T) printERROR(2);
 	else {
 		Node * get = getKeyNode(T);
 		if (!get) printERROR(3);
@@ -203,7 +202,7 @@ void R11() {
 	if (T) {
 		Node * root = T->root;
 		if (root) {
-			printf("\nRoot node:  key=%d value=%d.\n",root->key, root->data);
+			printf("\nRoot node:  key=%d value=%d.\n", root->key, root->data);
 		} else {
 			printf("\nThis tree is empty.\n");
 		}
@@ -236,7 +235,7 @@ void V13() {
 		Node * get = getKeyNode(T);
 		if (!get) printERROR(3);
 		else {
-			printf("its value is %d", Value(T,get));
+			printf("its value is %d", Value(T, get));
 		}
 	} else {
 		printERROR(2);
@@ -262,7 +261,7 @@ void IC14() {
 				int LR = 0; scanf("%d%*c", &LR);
 				if (LR == 1 || LR == 0) {
 					if (InsertChild(T, get, LR, Tnew)) {
-                        removeTreeFromArray(Tnew);
+						removeTreeFromArray(Tnew);
 						printf("successful!\n");
 					} else printf("the postion have been occupied.\n");
 				} else {
@@ -281,7 +280,7 @@ void DC15() {
 		Node *get = getKeyNode(T);
 		if (!get) printERROR(3);
 		else {
-            printf("Please choose to delete L or R of this node(L->0 R->1)\n");
+			printf("Please choose to delete L or R of this node(L->0 R->1)\n");
 			int LR = 0; scanf("%d%*c", &LR);
 			if (LR == 1 || LR == 0) {
 				if (DeleteChild(T, get, LR)) {
@@ -389,13 +388,13 @@ void IN22() {
 	else {
 		printf("Please input the key of new node:");
 		ElemType key = 0; scanf("%d%*c", &key);
-        if(FindNode(T,key)){
-            printf("there has been a node with the same key\n");
-            return;
-        }
+		if (FindNode(T, key)) {
+			printf("there has been a node with the same key\n");
+			return;
+		}
 		printf("Please input the value of new node:");
 		ElemType value = 0; scanf("%d%*c", &value);
-		Node * newNode = (Node*)malloc(sizeof(Node *));
+		Node * newNode = (Node*)malloc(sizeof(Node));
 		newNode->key = key;
 		newNode->data = value;
 		newNode->left = NULL; newNode->right = NULL;
@@ -407,7 +406,7 @@ void IN22() {
 			printf("Please input the key of parent of this node:");
 			ElemType parentKey = 0; scanf("%d%*c", &parentKey);
 			Node * parentNode = FindNode(T, parentKey);
-			if(!parentNode) {printf("there isn't such a node with this key.\n");return;}
+			if (!parentNode) { printf("there isn't such a node with this key.\n"); return; }
 
 			printf("Please choose left or right( 0:left 1: right ):");
 			int LR = 0; scanf("%d%*c", &LR);
@@ -426,7 +425,12 @@ void IN22() {
 void printMenu() {
 	system("cls");	printf("\n");
 	printf("          Menu for Binary Tree\n");
-	printf("-------------------------------------------------\n");
+	printf("-----------------Trees List----------------------\n");
+	int i = 0;
+	for(i = 0; i < indexTreeArray; i++){
+        printf("%s ,",treeArray[i]->name);
+	}
+	printf("\n-------------------------------------------------\n");
 	printf("    	  1. InitBiTree\t\t\t2. Assign\n");
 	printf("    	  3. DestroyTree\t\t4. Parent \n");
 	printf("    	  5. ClearBiTree\t\t6. LeftChild\n");
@@ -455,9 +459,9 @@ int main() {
 
 		switch (op) {
 		case 1://InitBiTree
-			IBT1();break;
+			IBT1(); break;
 		case 2://Assign
-			A2();break;
+			A2(); break;
 		case 3://Destroy
 			DT3(); break;
 		case 4://Parent
@@ -469,21 +473,21 @@ int main() {
 		case 7://Empty
 			BTE7(); break;
 		case 8://RightChild
-			RC8();break;
+			RC8(); break;
 		case 9://Depth
-			BTD9();break;
+			BTD9(); break;
 		case 10://LeftSibling
 			LS10(); break;
 		case 11://Root
 			R11(); break;
 		case 12://RightSibling
-			RS12();break;
+			RS12(); break;
 		case 13://get value
 			V13(); break;
 		case 14://InsertChild
 			IC14(); break;
 		case 15://DeleteChild
-			DC15();break;
+			DC15(); break;
 		case 16://PreOrderTraverse
 			POT16(); break;
 		case 17://InOrderTraverse
@@ -493,13 +497,13 @@ int main() {
 		case 19://LevelOrderTraverse
 			LOT19(); break;
 		case 20://LoadTree
-		    LT20();
+			LT20();
 			break;
 		case 21://Save tree
 			ST21();
 			break;
 		case 22://InsertNode
-			IN22();break;
+			IN22(); break;
 		case 0:
 			op = 0;
 			break;
