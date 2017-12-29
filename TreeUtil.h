@@ -51,8 +51,8 @@ Status LevelOrderTraverse(Tree * T);
 
 Tree * LoadTree(char * TreeName);
 Status saveTree(Tree * T);
-void LevelOreder_recurve(Node * node);
-void BiTreeDepth_recurve(Node * node);
+void LevelOreder_recurve(Node * node, int depthNow);
+void BiTreeDepth_recurve(Node * node, int i);
 Status InsertNode(Tree * T, Node * p, int LR, Node * c);
 void PostOrderTraverse_recurve(Node * n);
 void InOrderTraverse_recurve(Node * n);
@@ -62,10 +62,11 @@ void ClearBiTree_recurve(Node * n);
 void printERROR(int code);//print error infomation
 int FindNode_recurve(Node * node, ElemType key, Node ** result);
 void saveTree_recurve(Node * node, int i);
-
+Node * LoadTree_recurve(int i);
+int BiTreeLength(Node * node);
 //Create a new and empty binary tree
 Status InitBiTree(Tree ** T) {
-	
+
 	Tree * newT = (Tree *)malloc(sizeof(Tree));
 	newT->length = 0;
 	newT->name = NULL;//set its name outside
@@ -91,12 +92,14 @@ void DestroyTree(Tree * T) {
 void ClearBiTree(Tree * T) {
 	ClearBiTree_recurve(T->root);
 	T->root = NULL;
+	T->length = 0;
 }
 void ClearBiTree_recurve(Node * n) {//for recursion
 	if (!n) return;
-	ClearBiTree_recurve(n->left);
-	ClearBiTree_recurve(n->right);
-	free(n);
+	ClearBiTree_recurve(n->left);n->left = NULL;
+	ClearBiTree_recurve(n->right);n->right = NULL;
+//	printf("key=%d value=%d\n",n->key,n->data);
+//	free(n);//and set old position of n as null outside
 }
 
 //get the root node of tree-T
@@ -149,8 +152,11 @@ int FindNode_recurve(Node * node, ElemType key, Node ** result) {
 		*result = node;
 		return 1;//1 means that we found the element, so we can set a flag to stop recursion
 	}
+//	FindNode_recurve(node->left, key, result);
+//	FindNode_recurve(node->right, key, result);
+//	return 1;
 	if (FindNode_recurve(node->left, key, result)) return 1;
-	if (FindNode_recurve(node->left, key, result)) return 1;
+	if (FindNode_recurve(node->right, key, result)) return 1;
 	return 0;
 }
 
@@ -245,7 +251,7 @@ void PostOrderTraverse_recurve(Node * n) {//for recursion
 Status InsertChild(Tree * T, Node * p, int LR, Tree * c) {
 
 	int flag = 0;
-	if (LR) {
+	if (!LR) {
 		Node * left = p->left;
 		if (!left) {//left is null
 			p->left = c->root;
@@ -270,7 +276,7 @@ Status InsertChild(Tree * T, Node * p, int LR, Tree * c) {
 //insert a new node to the tree-T, 0->L 1->R
 Status InsertNode(Tree * T, Node * p, int LR, Node * c) {
 
-	if (LR) {
+	if (!LR) {
 		Node * left = p->left;
 		if (!left) {//left is null
 			p->left = c;
@@ -291,16 +297,18 @@ Status InsertNode(Tree * T, Node * p, int LR, Node * c) {
 
 //delete a child-tree
 Status DeleteChild(Tree * T, Node * p, int LR) {
-	if (LR) {
+	if (!LR) {
 		Node * left = p->left;
 		if (left) {//left is not null
+            T->length -= BiTreeLength(left);
 			ClearBiTree_recurve(left);
 			p->left = NULL;
 			return OK;
 		}
 	} else {
 		Node * right = p->right;
-		if (right) {//right is not null
+		if (right) {//right is not nulls
+            T->length -= BiTreeLength(right);
 			ClearBiTree_recurve(right);
 			p->right = NULL;
 			return OK;
@@ -315,43 +323,33 @@ Status BiTreeEmpty(Tree * T) {
 }
 
 //get the depth of this binary tree
-int depth = 0;//aux-count
 int depthMax = 0;
 int BiTreeDepth(Tree * T) {
-	depth = 0;//reset their value
 	depthMax = 0;
 	Node * head = T->root;
-	BiTreeDepth_recurve(head);
+	BiTreeDepth_recurve(head, 1);
 	return depthMax;
 }
-void BiTreeDepth_recurve(Node * node) {
-	if (!node) {
-		--depth;
-		return;
-	}
-	
-	++depth;
-	if (depth > depthMax) depthMax = depthMax;
+void BiTreeDepth_recurve(Node * node, int i) {
+	if (!node) return;
+	if (i > depthMax) depthMax = i;
 
-	BiTreeDepth_recurve(node->left);
-	BiTreeDepth_recurve(node->right);
+	BiTreeDepth_recurve(node->left, i+1);
+	BiTreeDepth_recurve(node->right, i+1);
 
 }
 
 
 //traverse in level, kind of BST, without an aux-quene to save memory
 int i = 0;
-int depthNow = 0;
-
 Status LevelOrderTraverse(Tree * T) {
-	i = 0; depthNow = 0;//reset two flags
+	i = 0; //reset two flags
 	if (T) {
 		Node * head = T->root;
-		depthNow = 0;
 		printf("LevelOrderTraverse:");
 		for (i = 1; i <= BiTreeDepth(T); i++) {
 			//each i means that we are trying to print all elements of the i'th level
-			LevelOreder_recurve(head);
+			LevelOreder_recurve(head, 1);
 		}
 		printf("\n");
 		return OK;
@@ -359,31 +357,27 @@ Status LevelOrderTraverse(Tree * T) {
 		return FALSE;
 	}
 }
-void LevelOreder_recurve(Node * node) {
-	if (!node) {
-		--depthNow;
-		return;
+void LevelOreder_recurve(Node * node, int depthNow) {
+	if (!node) return;
+
+	if (depthNow == i) {
+		printf("%d ", node->data);//print the go back in recursion
+	} else {
+		LevelOreder_recurve(node->left, depthNow+1);
+		LevelOreder_recurve(node->right, depthNow+1);
 	}
 
-	++depthNow;
-	if (depthNow == i) {
-		printf("%d ", node->data);
-	} else {
-		LevelOreder_recurve(node->left);
-		LevelOreder_recurve(node->right);
-	}
-	
 }
 
 //save this tree in disk in a simple way
 Node ** saveList = NULL;
 Status saveTree(Tree * T) {
-	
+
 	FILE * fP = fopen(T->name, "wb");
-	if (!fP) return FALSE;	
+	if (!fP) return FALSE;
 	int depth = BiTreeDepth(T);
-	const int LISTSIZE = pow(2,depth) - 1;
-	Node ** saveList = (Node **)malloc(sizeof(Node*)*LISTSIZE);
+	int LISTSIZE = pow(2,depth) - 1;
+    saveList = (Node **)malloc(sizeof(Node*)*LISTSIZE);
 	int i = 0;
 	for (i = 0; i < LISTSIZE; i++) {
 		saveList[i] = NULL;
@@ -394,13 +388,14 @@ Status saveTree(Tree * T) {
 	nullNode->key = NULLNODECODE;
 
 	saveTree_recurve(T->root, 1);//call this function to load nodes to save list, including null nodes
+
 	for (i = 0; i < LISTSIZE; i++) {
 		if (saveList[i]) {
 			fwrite(saveList[i], sizeof(Node), 1, fP);
 		} else {//null node
 			fwrite(nullNode, sizeof(Node), 1, fP);
 		}
-		
+
 	}//save node list to disk
 	free(saveList);saveList = NULL;//reset
 	return TRUE;
@@ -408,7 +403,7 @@ Status saveTree(Tree * T) {
 void saveTree_recurve(Node * node, int i) {
 	if (!node) return;
 	saveList[i - 1] = node;
-	
+
 	saveTree_recurve(node->left, 2 * i);
 	saveTree_recurve(node->right, 2 * i+1);
 }
@@ -416,29 +411,37 @@ void saveTree_recurve(Node * node, int i) {
 //Load tree data from disk
 Node ** loadList = NULL;
 int maxIndex_loadTree = 0;
+
 Tree * LoadTree(char * TreeName) {
+
 	maxIndex_loadTree = 0;
 	loadList = (Node **)malloc(sizeof(Node *) * LOAD_LIST_SIZE);//we set a init-num, in fact it's not elegant.
 	register int i = 0;
 	for (i = 0; i < LOAD_LIST_SIZE; i++) {
 		loadList[i] = NULL;
 	}
+
 	FILE * fP = fopen(TreeName, "rb");
 	if (!fP) return NULL;
 	else {//this file exists
 		i = 0;
 		Node * newNode = (Node*)malloc(sizeof(Node));
+
 		while (fread(newNode, sizeof(Node), 1, fP)) {
 			loadList[i] = newNode; i++;
+			newNode = (Node *)malloc(sizeof(Node));
 		}
+		free(newNode);
 	}
+
 	//now we got a list full of nodes
 	//int i is length of this list
-	int depth = (int)sqrt(i+1);
+//	int depth = (int)sqrt(i+1);
 	maxIndex_loadTree = i;
 	Node * root = LoadTree_recurve(1);//load
 	Tree * T = (Tree *)malloc(sizeof(Tree));
 	if (T) {
+        T->root = root;
 		T->length = i;
 		T->name = TreeName;
 	}
@@ -462,4 +465,9 @@ Node * LoadTree_recurve(int i) {
 		node->right = LoadTree_recurve(i * 2 + 1);
 	}
 	return node;
+}
+
+int BiTreeLength(Node * node){
+    if(!node) return 0;
+    return BiTreeLength(node->left)+BiTreeLength(node->right)+1;
 }
