@@ -25,7 +25,7 @@ void initTreeArray() {
 //move this tree to the end of tree array so we can easily remove it
 //if you try to vall this func , make sure tree-T has already been in tree array
 void removeTreeFromArray(Tree * T) {
-	
+
 	int index = 0;
 	for (index = 0; index < indexTreeArray; index++) {
 		if (treeArray[index] == T) {
@@ -56,8 +56,7 @@ Tree * getTree() {
 Node * getKeyNode(Tree * T) {
 	printf("\nPlease input the key of this node:");
 	ElemType key = 0; scanf("%d%*c", &key);
-	Node * get = FindNode(T, key);
-	return get;
+	return FindNode(T, key);
 }
 
 //InitBiTree
@@ -65,7 +64,7 @@ void IBT1() {
 	Tree * T = NULL;
 	printf("\nPlease input the name of new list:");
 	char * name = (char *)malloc(30 * sizeof(char)); fgetsNoN(name, 30, stdin);
-	if (InitBiTree(&T)) { 
+	if (InitBiTree(&T)) {
 		printf("Binary Tree has been created\n");
 		T->name = name;
 		treeArray[indexTreeArray] = T; indexTreeArray++;
@@ -145,7 +144,7 @@ void LC6() {
 void BTE7() {
 	Tree * T = getTree();
 	if (T) {
-		if (!BiTreeEmpty(T)) {
+		if (BiTreeEmpty(T)) {
 			printf("\nIt's not empty\n");
 		} else {
 			printf("\nIt's empty\n");
@@ -263,6 +262,7 @@ void IC14() {
 				int LR = 0; scanf("%d%*c", &LR);
 				if (LR == 1 || LR == 0) {
 					if (InsertChild(T, get, LR, Tnew)) {
+                        removeTreeFromArray(Tnew);
 						printf("successful!\n");
 					} else printf("the postion have been occupied.\n");
 				} else {
@@ -281,11 +281,13 @@ void DC15() {
 		Node *get = getKeyNode(T);
 		if (!get) printERROR(3);
 		else {
+            printf("Please choose to delete L or R of this node(L->0 R->1)\n");
 			int LR = 0; scanf("%d%*c", &LR);
 			if (LR == 1 || LR == 0) {
 				if (DeleteChild(T, get, LR)) {
 					printf("successful!\n");
-				} else printf("the postion have been occupied.\n");
+
+				} else printf("Failed, the position don't have child.\n");
 			} else {
 				printf("error happened!\n");
 			}
@@ -387,21 +389,28 @@ void IN22() {
 	else {
 		printf("Please input the key of new node:");
 		ElemType key = 0; scanf("%d%*c", &key);
+        if(FindNode(T,key)){
+            printf("there has been a node with the same key\n");
+            return;
+        }
 		printf("Please input the value of new node:");
 		ElemType value = 0; scanf("%d%*c", &value);
 		Node * newNode = (Node*)malloc(sizeof(Node *));
-		newNode->key = key; 
+		newNode->key = key;
 		newNode->data = value;
 		newNode->left = NULL; newNode->right = NULL;
 		if (!BiTreeEmpty(T)) {//it's empty now
 			T->root = newNode;
+			T->length++;
 			printf("successful\n");
 		} else {
 			printf("Please input the key of parent of this node:");
 			ElemType parentKey = 0; scanf("%d%*c", &parentKey);
+			Node * parentNode = FindNode(T, parentKey);
+			if(!parentNode) {printf("there isn't such a node with this key.\n");return;}
+
 			printf("Please choose left or right( 0:left 1: right ):");
 			int LR = 0; scanf("%d%*c", &LR);
-			Node * parentNode = FindNode(T, parentKey);
 			if (LR == 0 && parentNode->left == NULL) {
 				parentNode->left = newNode;
 				T->length++;
@@ -484,6 +493,7 @@ int main() {
 		case 19://LevelOrderTraverse
 			LOT19(); break;
 		case 20://LoadTree
+		    LT20();
 			break;
 		case 21://Save tree
 			ST21();
