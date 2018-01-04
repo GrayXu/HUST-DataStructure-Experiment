@@ -284,12 +284,14 @@ Status InitList(SqList ** Lp) {
 }
 
 void growList(SqList * L) {
-	L->elem = (ElemType *)realloc(L->elem, L->listsize + LISTINCREMENT);
+	L->elem = (ElemType *)realloc(L->elem, L->listsize + LISTINCREMENT * sizeof(ElemType));
+    L->listsize += LISTINCREMENT;
 	if (L->elem == NULL) exit(0);
 }
 
 void cutList(SqList * L) {//Pay attention to the opportunity to avoid frequently cutting and growing
-	L->elem = (ElemType *)realloc(L->elem, L->listsize - LISTINCREMENT);
+	L->elem = (ElemType *)realloc(L->elem, L->listsize - LISTINCREMENT * sizeof(ElemType));
+    L->listsize -= LISTINCREMENT;
 	if (L->elem == NULL) exit(0);
 }
 

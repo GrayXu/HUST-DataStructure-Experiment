@@ -420,6 +420,30 @@ void IN22() {
 		}
 	}
 }
+//Quickly Create a binary tree with a pre-order array
+void QCT23(){
+    Tree * T = NULL;
+	printf("\nPlease input the name of new list:");
+	char * name = (char *)malloc(30 * sizeof(char)); fgetsNoN(name, 30, stdin);
+
+	T = (Tree*)malloc(sizeof(Tree));
+	if(!T) exit(1);
+
+	T->name = name;
+    T->root = NULL;
+    T->length = 0;
+
+    printf("\nPlease input the pre-order-traverse( null-># ) data of new list:");
+    createTreeQuickly(&(T->root));
+    printf("\nPlease input the pre-order-traverse key ( split by space ) of new list:");
+    valueKeyFromQuick(T->root);
+    getchar();
+	if (T->root) {
+		printf("Binary Tree has been created\n");
+		T->name = name;
+		treeArray[indexTreeArray] = T; indexTreeArray++;
+	} else { printERROR(1); }
+}
 
 //print the top-layer menu
 void printMenu() {
@@ -442,6 +466,7 @@ void printMenu() {
 	printf("    	  17. InOrderTraverse\t\t18. PostOrderTraverse\n");
 	printf("    	  19. LevelOrderTraverse\t20. LoadTree\n");
 	printf("    	  21. saveTree\t\t\t22. InsertNode\n");
+	printf("    	  23. QuickCreateTree\n");
 	printf("    	  0. Exit\n");
 	printf("-------------------------------------------------\n");
 }
@@ -504,6 +529,8 @@ int main() {
 			break;
 		case 22://InsertNode
 			IN22(); break;
+        case 23://create a binary tree in a fast way
+            QCT23();break;
 		case 0:
 			op = 0;
 			break;

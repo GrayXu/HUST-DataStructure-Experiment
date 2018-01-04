@@ -59,11 +59,47 @@ void InOrderTraverse_recurve(Node * n);
 void PreOrderTraverse_recurve(Node * n);
 int Parent_recurve(Node * start, Node * key, Node ** parent);
 void ClearBiTree_recurve(Node * n);
-void printERROR(int code);//print error infomation
+void printERROR(int code);//print error information
 int FindNode_recurve(Node * node, ElemType key, Node ** result);
 void saveTree_recurve(Node * node, int i);
 Node * LoadTree_recurve(int i);
 int BiTreeLength(Node * node);
+
+/*
+    Quickly Create a binary tree with a pre-order array
+    when calling this function outside, parameter "node" must be root-node.
+*/
+void createTreeQuickly(Node** nodeP) {
+	Node * node = *nodeP;
+	char * temp = (char*)malloc(sizeof(char)*10);
+	scanf("%s", temp);
+
+    if (!strcmp(temp, "#"))return;//equal
+    //else
+    int result = atoi(temp);
+
+	*nodeP = (Node*)malloc(sizeof(Node)); node = *nodeP;
+	if(!node) {
+        printERROR(1);
+        exit(1);
+    }
+	node->data = result; node->left = NULL; node->right = NULL;
+	free(temp);
+	createTreeQuickly(&node->left);
+	createTreeQuickly(&node->right);
+}
+//Set values in one time for a tree just being created quickly
+void valueKeyFromQuick(Node* node){
+    if(!node) return;
+    char * temp = (char*)malloc(sizeof(char)*10);
+	scanf("%s", temp);
+	int result = atoi(temp);
+	free(temp);
+	node->key = result;
+	valueKeyFromQuick(node->left);
+	valueKeyFromQuick(node->right);
+}
+
 //Create a new and empty binary tree
 Status InitBiTree(Tree ** T) {
 
