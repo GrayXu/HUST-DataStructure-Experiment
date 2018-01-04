@@ -39,7 +39,7 @@ Status DeleteArc(Graph * g, Vertex * v, Vertex * w);
 void DFSTraverse(Graph * g);
 void BFSTraverse(Graph * g);
 
-Status deleteVexFromAdj(Vertex * del, Vertex ** startVex);
+Status deleteVexFromAdj(Vertex * del, Vertex * startVex);
 void deleteAdjLink(Vertex * v);
 void dfs_recurve(Graph * g, Vertex * v);
 Status isMarked(Vertex * v);
@@ -70,29 +70,6 @@ Vertex * FindVertex(Graph * g, ElemType key) {
 		startVex = startVex->next;
 	}
 	return NULL;
-}
-
-//delete a adj-link
-void deleteAdjLink(Vertex * startVex) {
-	Vertex * v = startVex; Vertex * vAdj = v;
-	while (v->adj) {
-		vAdj = v->adj;
-		free(v);
-		v = vAdj;
-	}
-	free(v);
-}
-
-//Destory the whole graph
-Status DestoryGraph(Graph * g) {
-	Vertex * startVex = g->head;
-	while (startVex) {
-		Vertex * tempV = startVex->next;
-		deleteAdjLink(startVex);
-		startVex = tempV;
-	}
-	free(g);
-	return TRUE;
 }
 
 //this func is used to find node's key from value
@@ -175,14 +152,12 @@ Status InsertVex(Graph * g, Vertex * v) {
 
 /**
 *	calling this func when you need to delete a vertex from a adj-link.
-*	return a new head vextex pointer for updating head outside
-*	we need a ** pointer parameter in case we have to change start-vertex
 */
-Status deleteVexFromAdj(Vertex * del, Vertex ** startVex) {
-	Vertex * tempV = *startVex;
-
+Status deleteVexFromAdj(Vertex * del, Vertex * startVex) {
+	Vertex * tempV = startVex->adj;
+	if(!tempV) return OK;
 	if (tempV->key == del->key) {//lucky enough, it's the first one
-		*startVex = tempV->adj;
+		startVex->adj = tempV->adj;
 		free(tempV);
 		return TRUE;
 	}
@@ -197,8 +172,31 @@ Status deleteVexFromAdj(Vertex * del, Vertex ** startVex) {
 
 		tempV = tempV->adj;
 	}
-	printf("error\n");
 	return FALSE;
+}
+
+
+//Destory the whole graph
+Status DestoryGraph(Graph * g) {
+	Vertex * startVex = g->head;
+	while (startVex) {
+		Vertex * tempV = startVex->next;
+		deleteAdjLink(startVex);
+		startVex = tempV;
+	}
+	free(g);
+	return TRUE;
+}
+
+//delete a adj-link
+void deleteAdjLink(Vertex * startVex) {
+	Vertex * v = startVex; Vertex * vAdj = v;
+	while (v->adj) {
+		vAdj = v->adj;
+		free(v);
+		v = vAdj;
+	}
+	free(v);
 }
 
 /*
@@ -206,14 +204,31 @@ delete a vertex and clean all edge concered about it
 */
 Status DeleteVex(Graph * g, Vertex * v) {
 	Vertex * startVex = g->head;
-	while (startVex) {
-		if (startVex->key == v->key) {
-			deleteAdjLink(startVex);
-		} else {
-			if (!deleteVexFromAdj(v, &startVex)) return FALSE;
-		}
+
+    while(startVex){
+        if(startVex->key != v->key){
+            deleteVexFromAdj(v, startVex);
+        }
 		startVex = startVex->next;
+    }
+
+    startVex = g->head;
+
+	if(v->key == g->head->key){//delete head
+        g->head = g->head->next;
+        deleteAdjLink(startVex);
+	}else{
+        while(startVex->next){
+            if(startVex->next->key == v->key){
+                Vertex * tempV = startVex->next->next;
+                deleteAdjLink(startVex->next);
+                startVex->next = tempV;
+                break;
+            }
+            startVex = startVex->next;
+        }
 	}
+
 	g->vertexCount--;
 	return TRUE;
 }
@@ -312,9 +327,9 @@ Status DeleteArc(Graph * g, Vertex * v, Vertex * w) {
 	int flag = 0;
 	while (startVex) {
 		if (startVex->key == v->key) {
-			if (deleteVexFromAdj(w, &startVex)) flag++;
+			if (deleteVexFromAdj(w, startVex)) flag++;
 		} else if (startVex->key == w->key) {
-			if (deleteVexFromAdj(v, &startVex)) flag++;
+			if (deleteVexFromAdj(v, startVex)) flag++;
 		}
 		startVex = startVex->next;
 	}
@@ -356,15 +371,19 @@ void dfs_recurve(Graph * g, Vertex * v) {
 	markVertexKeys[size_markVertex] = v->key; size_markVertex++;
 	//do sth
 	Vertex * trueV = FindVertex(g, v->key);
-	printf("key=%d value=%d\n", trueV->key, trueV->data);
+	if(!trueV) printf("error!");
+	else {
+        printf("key=%d value=%d\n", trueV->key, trueV->data);
+        Vertex * tempV = trueV->adj;
+        while (tempV) {
+            if (!isMarked(tempV)) {
+                dfs_recurve(g, tempV);//not be marked so we traverse this node
+            }
+            tempV = tempV->adj;
+        }
+    }
 
-	Vertex * tempV = trueV->adj;
-	while (tempV) {
-		if (!isMarked(tempV)) {
-			dfs_recurve(g, tempV);//not be marked so we traverse this node
-		}
-		tempV = tempV->adj;
-	}
+
 }
 
 /*
@@ -398,9 +417,12 @@ void BFSTraverse(Graph * g) {
 				while (tempV) {
 					if (!isMarked(tempV)) {
 						Vertex * trueV = FindVertex(g, tempV->key);
-						printf("key=%d value=%d\n", trueV->key, trueV->data);
-						enQueue(q, tempV);
-						markVertexKeys[size_markVertex] = tempV->key; size_markVertex++;
+						if(!trueV) printf("error!\n");
+						else{
+                           printf("key=%d value=%d\n", trueV->key, trueV->data);
+                            enQueue(q, tempV);
+                            markVertexKeys[size_markVertex] = tempV->key; size_markVertex++;
+						}
 					}
 					tempV = tempV->adj;
 				}
@@ -414,3 +436,4 @@ void BFSTraverse(Graph * g) {
 	free(markVertexKeys);
 	destroyQueue(q);
 }
+

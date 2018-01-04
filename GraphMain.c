@@ -53,8 +53,8 @@ Vertex * getKeyNode(Graph * g) {
 	print the top-layer menu
 */
 void printMenu(Graph * g) {
-	system("cls");	
-	
+	system("cls");
+
 	printf("----Menu for Undirected and Unweighted Graph----\n\n");
 	printf("    	  1. CreateEmptyGraph\t2. DestoryGraph\n");
 	printf("    	  3. LocateVex\t\t4. GetVex \n");
@@ -63,7 +63,7 @@ void printMenu(Graph * g) {
 	printf("    	  9. DeleteVex\t\t10. InsertArc\n");
 	printf("    	  11. DeleteArc\t\t12. DFSTraverse\n");
 	printf("    	  13. BFSTraverse\t0. Exit\n");
-	
+
 
 	if (g) {
 		printf("\n------------------Vertexs' Key List--------------\n");
@@ -76,7 +76,7 @@ void printMenu(Graph * g) {
 	} else {
 		printf("\n-------------------------------------------------\n");
 	}
-	
+
 }
 
 int main() {
@@ -144,7 +144,7 @@ int main() {
 				else {
 					Vertex * getVer = FirstAdjVex(g, v);
 					if (!getVer) printf("this vertex don't have adj-vex\n");
-					else { 
+					else {
 						Vertex * trueV = FindVertex(g, getVer->key);
 						printf("the first adj-vex: key=%d value=%d\n", trueV->key, trueV->data);
 					}
@@ -166,7 +166,7 @@ int main() {
 					else {
 						Vertex * nextV = NextAdjVex(g, v, vAdj);
 						if (!nextV) printf("We don't find such a next-adj-vex.\n");
-						else { 
+						else {
 							Vertex * trueV = FindVertex(g, nextV->key);
 							printf("next-adj-vex: key=%d value=%d", trueV->key, trueV->data);
 						}
@@ -185,8 +185,8 @@ int main() {
 					ElemType data = 0; scanf("%d%*c", &data);
 					Vertex * newVertex = (Vertex *)malloc(sizeof(Vertex));
 					newVertex->key = key; newVertex->data = data; newVertex->next = NULL;
-					if (!newVertex) { 
-						printInfo(1); 
+					if (!newVertex) {
+						printInfo(1);
 						free(newVertex);
 					}
 					else {

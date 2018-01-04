@@ -209,6 +209,9 @@ Node * RightChild(Tree * T, Node * e) {
 //find the parent node of node-e
 Node * Parent(Tree * T, Node * e) {
 	Node * parent = NULL;
+	if(e->key == T->root->key){
+        return NULL;
+	}
 	Parent_recurve(T->root, e, &parent);
 	return parent;
 }

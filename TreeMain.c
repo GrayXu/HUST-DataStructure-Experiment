@@ -106,7 +106,9 @@ void P4() {
 		if (!get) printERROR(3);//not null
 		else {
 			Node * parent = Parent(T, get);
-			printf("the parent node: key=%d value=%d", parent->key, parent->data);
+			if(parent)printf("the parent node: key=%d value=%d", parent->key, parent->data);
+			else printf("no parent-node.\n");
+
 		}
 	} else {
 		printERROR(2);

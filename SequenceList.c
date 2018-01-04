@@ -1,20 +1,20 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <windows.h>
-typedef int ElemType;//make sure that it's a basic data type
+typedef int ElemType; // make sure that it's a basic data type
 typedef int Status;
 #define TRUE 1
 #define FALSE 0
 #define OK 1
-#define LIST_INIT_SIZE 100 //init length
+#define LIST_INIT_SIZE 100 // init length
 #define LISTINCREMENT 10 //step-length when growing and cutting
-#define LISTGAP 15//redundant length needed to decide cutting list or not
+#define LISTGAP 15 //redundant length needed to decide cutting list or not
 
 typedef struct {
 	ElemType * elem;
 	int length;
 	int listsize;
-	char * name;//length = 30
+	char * name; //length = 30
 }SqList;
 
 Status InitList(SqList ** L);
@@ -269,6 +269,7 @@ Status LoadList(SqList ** Lp, char * name) {
 	fclose(fP);
 	return OK;
 }
+
 
 Status InitList(SqList ** Lp) {
 	*Lp = (SqList *)malloc(sizeof(SqList));
