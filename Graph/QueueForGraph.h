@@ -7,7 +7,7 @@ typedef int Status;
 #define FALSE 0
 #define OK 1
 #define LISTINCREMENT 10 //step-length when growing and cutting
-#define LIST_INIT_SIZE 100
+#define LIST_INIT_SIZE 20
 
 typedef struct vertex {
 	ElemType key;

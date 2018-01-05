@@ -435,6 +435,7 @@ int LocateElem(SqList * L, ElemType * e) {
 	return -1;
 }
 
+//Override fgets, so that we can get a string in inputstream without '\n'
 char *fgetsNoN(char *buf, int bufsize, FILE *stream) {
 	char * returnP = fgets(buf, bufsize, stream);
 	int i = 0;

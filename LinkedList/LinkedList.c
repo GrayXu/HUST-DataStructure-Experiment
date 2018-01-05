@@ -228,6 +228,7 @@ int main() {
 	return 0;
 }
 
+//save a list to disk
 Status SaveList(SqList * L) {
 	FILE * fP = fopen(L->name, "wb");
 	if (fP != NULL) {
@@ -245,6 +246,7 @@ Status SaveList(SqList * L) {
 	}
 }
 
+//loada list from disk, and the sqlist pointer will be the parameter-Lp
 Status LoadList(SqList ** Lp, char * name) {
 	SqList * L = *Lp;
 	if (L != NULL) {
@@ -282,6 +284,7 @@ Status LoadList(SqList ** Lp, char * name) {
 	}
 }
 
+//initalize this list, give it space and make it empty
 Status InitList(SqList ** Lp) {
 	*Lp = (SqList *)malloc(sizeof(SqList));
 
@@ -292,12 +295,14 @@ Status InitList(SqList ** Lp) {
 	return OK;
 }
 
+//destory the whole list, free all space it takes
 void DestoryList(SqList * L) {
 	ClearList(L);
 	free(L->name);
 	free(L);
 }
 
+//clear the data of this list
 void ClearList(SqList * L) {
 	LNode * p = L->head;
 	LNode * pNext = p;
@@ -313,6 +318,7 @@ void ClearList(SqList * L) {
 	L->head = NULL;
 }
 
+//empty->TRUE not-empty->FALSE
 Status ListEmpty(SqList * L) {
 	if (L->length == 0) {
 		return TRUE;
@@ -321,10 +327,12 @@ Status ListEmpty(SqList * L) {
 	}
 }
 
+//return the length of this list
 int ListLength(SqList * L) {
 	return L->length;
 }
 
+//get element by index-i
 Status GetElem(SqList * L, int i, ElemType * e) {
 	if (i > L->length || i < 1) {
 		return FALSE;
@@ -344,6 +352,7 @@ Status GetElem(SqList * L, int i, ElemType * e) {
 
 }
 
+//return the prior item of parameter-cur_e
 Status PriorElem(SqList * L, ElemType * cur_e, ElemType * pre_e) {
 	LNode * p = L->head;
 	while (p->next != NULL) {
@@ -357,6 +366,7 @@ Status PriorElem(SqList * L, ElemType * cur_e, ElemType * pre_e) {
 	return FALSE;//including two situation(no such elemType in this list or cur_e is the head one)
 }
 
+//return the prior item of parameter-cur_e
 Status NextElem(SqList * L, ElemType * cur_e, ElemType * next_e) {
 	LNode * p = L->head;
 	while (p != NULL) {
@@ -371,6 +381,7 @@ Status NextElem(SqList * L, ElemType * cur_e, ElemType * next_e) {
 	return FALSE;//including two situation(no such elemType in this list or cur_e is the last one)
 }
 
+//insert a element into this list
 Status ListInsert(SqList * L, int i, ElemType * e) {
 	int count = 0;
 	LNode * p = L->head;
@@ -403,6 +414,7 @@ Status ListInsert(SqList * L, int i, ElemType * e) {
 	return FALSE;
 }
 
+//delete a element from this list
 Status ListDelete(SqList * L, int i, ElemType * e) {
 	int count = 0;
 	LNode * p = L->head;
@@ -430,6 +442,7 @@ Status ListDelete(SqList * L, int i, ElemType * e) {
 
 }
 
+//traverse this list and output all element
 Status ListTraverse(SqList * L) {
 	printf("\n-----------all elements -----------------------\n");
 	LNode * p = L->head;
@@ -441,6 +454,7 @@ Status ListTraverse(SqList * L) {
 	return L->length;//return the length of list
 }
 
+//return a element's index of list-l
 int LocateElem(SqList * L, ElemType * e) {
 	int count = 0;
 	LNode * p = L->head;
@@ -452,6 +466,7 @@ int LocateElem(SqList * L, ElemType * e) {
 	return -1;
 }
 
+//Override fgets, so that we can get a string in inputstream without '\n'
 char *fgetsNoN(char *buf, int bufsize, FILE *stream) {
 	char * returnP = fgets(buf, bufsize, stream);
 	int i = 0;

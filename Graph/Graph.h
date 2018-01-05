@@ -17,13 +17,6 @@ typedef struct graph {
 	Vertex * head;
 } Graph;
 
-typedef struct edge {
-	/*Vertex * a;
-	Vertex * b;*/
-	ElemType keyV;
-	ElemType keyW;
-} Edge;
-
 //Status CreateGraph(Grapgh ** g, Vertex ** vertexList, Edge ** edgeList);//better a more convient way to create a new graph
 Status CreateEmptyGraph(Graph ** gP);
 Status DestoryGraph(Graph * g);
