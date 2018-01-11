@@ -98,6 +98,7 @@ int main() {
 			else {
 				DestoryGraph(g);
 				printInfo(3);
+				g = NULL;
 			}
 			break;
 		case 3://LocateVex
